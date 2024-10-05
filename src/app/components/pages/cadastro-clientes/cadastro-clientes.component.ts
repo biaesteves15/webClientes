@@ -16,25 +16,35 @@ import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 })
 export class CadastroClientesComponent {
 
+  mensagem: string = '';
+
   constructor (
-    private HttpClient: HttpClient
+    private httpClient: HttpClient
   ){}
 
   formulario = new FormGroup({
-    nome: new FormControl('', [Validators.required]),
-    cpf: new FormControl('', [Validators.required]),
-    email: new FormControl('', [Validators.required]),
-    telefone: new FormControl('', [Validators.required]),
-  })
+    nome: new FormControl('', [Validators.required, Validators.minLength(8)]),
+    cpf: new FormControl('', [Validators.required, Validators.pattern(/^\d{11}$/)]),
+    email: new FormControl('', [Validators.required, Validators.email]),
+    telefone: new FormControl('', [Validators.required, Validators.pattern(/^\d{11}$/)]),
+  });
+
+  get f(){
+    return this.formulario.controls;
+  }
 
   cadastrarCliente(){
-    this.HttpClient
+    this.httpClient
     .post('http://localhost:8081/api/clientes', this.formulario.value, 
       {responseType: 'text'})
       .subscribe({
         next: (data) => {
-          console.log(data);
+          this.mensagem = data;
+
+          if(data.includes('sucesso')){
+            this.formulario.reset();
+          }
         }
-      })
+      });
   }
 }
